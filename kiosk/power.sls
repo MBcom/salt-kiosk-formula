@@ -14,7 +14,12 @@ scheduled_shutdown:
     - identifier: KIOSK_AUTO_SHUTDOWN
     - require:
       - pkg: kiosk_base_packages # Ensure cron is installed
-
+{% else %}
+# Remove shutdown cron job if disabled
+scheduled_shutdown:
+  cron.absent:
+    - identifier: KIOSK_AUTO_SHUTDOWN
+    - user: root
 {% endif %}
 
 {% if kiosk.rtcwake.enabled %}
@@ -28,4 +33,10 @@ scheduled_wake:
     - identifier: KIOSK_HIBERNATE_WAKE
     - require:
       - pkg: kiosk_base_packages
+{% else %}
+# Remove rtcwake cron job if disabled
+scheduled_wake:
+  cron.absent:
+    - identifier: KIOSK_HIBERNATE_WAKE
+    - user: root
 {% endif %}
