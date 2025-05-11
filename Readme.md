@@ -89,6 +89,25 @@ You can find a full example in `.\pillar.example`. You will any default values i
 salt '*' state.apply kiosk
 ```
 
+### Remote Support
+You can connect to the PC remotely using SSH and forward the noVNC port to your own machine.
+You can view and control anything the end user can see and do on the connected monitor.  
+  
+1. Create a port forwarding using SSH to your kiosk PC. You can use the `kiosk` account created by this formula and the password you configured in your pillar under `kiosk.user_password`, or use any other user account you have access to (For example, use another SaltStack formula to manage additional users or distribute your SSH keys on the system.):
+
+```bash
+ssh -L 6080:localhost:6080 kiosk@your-kiosk-pc
+```
+
+2. Open your browser at `http://localhost:6080` and enter the password you configured in your pillar under `kiosk.vnc_password`. You should see the same screen that is displayed on the connected monitor.
+
+### Troubleshooting
+All relevant logs are stored in:
+* `/tmp/kiosk_startup.log` - Informational messages and Chrome logs
+* `/tmp/kiosk_error.log` - Error messages like Chrome shutdowns
+
+Note: These logs are cleared during system startup.
+
 ## Security Considerations
 
 - Change default passwords in pillar data
