@@ -1,0 +1,38 @@
+# salt/kiosk/files/systemd/x11vnc.service
+# This file is managed by SaltStack. Do not edit manually.
+[Unit]
+Description=x11vnc VNC Server for X11 Display :0 (Kiosk User)
+# Remove the problematic graphical target dependencies.
+# Rely on -loop and Restart=on-failure for X session availability.
+# Only wait for basic networking.
+After=network.target
+
+[Service]
+Type=simple
+User={{ kiosk_user }}
+Group={{ kiosk_user }}
+
+Environment=DISPLAY=:0
+# Environment=XAUTHORITY={{ pillar.kiosk.user_home }}/.Xauthority # Usually not needed
+
+
+# Run x11vnc attached to the primary display (:0)
+# -display :0 : Connect to the physical display
+# -localhost: Only listen on 127.0.0.1 (important for security)
+# -rfbport {{ vnc_display_port }}: The port VNC clients connect to (internally)
+# -rfbauth {{ vnc_passwd_file }}: Use the generated password file
+# -forever: Keep running even after client disconnects
+# -loop: Keep retrying if the X server isn't ready yet
+# -shared: Allow multiple simultaneous VNC connections (optional)
+# -noxdamage: Workaround for potential display issues (optional, try removing if causing problems)
+# -loop will make x11vnc wait/retry until the display is available
+ExecStart=/usr/bin/x11vnc -display :0 -localhost -rfbport {{ vnc_display_port }} -rfbauth {{ vnc_passwd_file }} -forever -loop -shared -noxdamage
+
+ExecStop=/usr/bin/killall x11vnc
+# Restart if it fails (e.g., if X isn't ready yet or crashes)
+Restart=on-failure
+RestartSec=5
+
+[Install]
+# Start as part of the normal multi-user boot process.
+WantedBy=multi-user.target

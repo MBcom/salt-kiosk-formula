@@ -1,0 +1,27 @@
+kiosk:
+  # -- User Setup --
+  user: kioskuser            # Dedicated user to run the kiosk session
+  user_home: /home/kioskuser
+  user_password: "mein-pw" # CHANGE THIS!
+
+  # Default URL to load
+  start_url: "https://www.google.com" # Change to your desired start page
+  # additionalChromeArgs: "--incognito --disable-infobars --disable-features=PasswordManager" # Additional arguments for Chrome (optional)
+
+  # -- VNC Setup --
+  vnc_password: "replace_with_a_strong_vnc_password" # CHANGE THIS!
+  novnc_port: 6080           # Port for the noVNC web interface (will bind to localhost)
+  vnc_display_port: 5900     # Internal port x11vnc listens on (localhost)
+
+  power:
+    enabled: True # Enable power management (shutdown, reboot, etc.)
+    shutdown_time: 22 # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
+    shutdown_time_minute: 0 # Minute to shutdown (0 for the top of the hour)
+
+  rtcwake:
+    enabled: False
+    mode: off # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+    start_hour: 18    # Start rtcwake at 6 PM
+    start_minute: 0
+    duration: 43200 # Wake up after 12 hours (in seconds)
+    

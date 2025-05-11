@@ -1,0 +1,21 @@
+# salt/kiosk/files/systemd/novnc.service
+# This file is managed by SaltStack. Do not edit manually.
+[Unit]
+Description=noVNC Websocket Proxy
+After=network.target x11vnc.service
+Requires=x11vnc.service
+
+[Service]
+Type=simple
+# Runs websockify to bridge WebSocket connections (from browser) to the standard VNC port
+# --web {{ novnc_web_dir }}: Serves the noVNC client files from this directory
+# 127.0.0.1:{{ novnc_port }}: Listens only on localhost for web connections (port forwarding needed)
+# localhost:{{ vnc_display_port }}: Forwards the connection to the x11vnc server (also on localhost)
+ExecStart=/usr/bin/websockify --web {{ novnc_web_dir }} 127.0.0.1:{{ novnc_port }} localhost:{{ vnc_display_port }}
+Restart=on-failure
+RestartSec=5
+User={{ kiosk_user }}
+Group={{ kiosk_user }}
+
+[Install]
+WantedBy=multi-user.target

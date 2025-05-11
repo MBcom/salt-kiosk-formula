@@ -1,0 +1,41 @@
+#!/bin/bash
+# salt/kiosk/files/user/dot_xinitrc
+# This file is managed by SaltStack. Do not edit manually.
+
+# Disable screen blanking and power management for the display
+xset s off -dpms
+
+GEO="$(xdpyinfo -display :0 | grep dimensions | grep -oE '[0-9]+x[0-9]+' | head -1)"
+WIDTH=$(echo "$GEO" | awk -F'x' '{print $1}')
+HEIGHT=$(echo "$GEO" | awk -F'x' '{print $2}')
+
+echo "Resolution: $WIDTH x $HEIGHT"
+
+BROWSER_CMD="google-chrome-stable"
+# Add flags like --incognito, --disable-translate, --no-default-browser-check if needed
+BROWSER_ARGS="--window-position=0,0 --window-size=$WIDTH,$HEIGHT --kiosk --start-maximized --no-first-run --disable-features=Translate {{ additionalChromeArgs }}"
+
+START_URL="{{ startUrl }}"
+
+# Function to check internet connectivity
+check_internet() {
+    wget -q --spider https://google.com
+    return $?
+}
+
+while ! check_internet; do
+    echo "Waiting 5s for internet connection..." >> /tmp/kiosk_startup.log
+    echo "Waiting 5s for internet connection..."
+    sleep 5
+done
+
+# Loop forever, relaunching the browser if it crashes or is somehow closed
+while true; do
+    echo "Starting browser: $BROWSER_CMD $BROWSER_ARGS $START_URL" >> /tmp/kiosk_startup.log
+    # Run the browser
+    $BROWSER_CMD $BROWSER_ARGS "$START_URL" 2>> /tmp/kiosk_error.log
+
+    # If the browser exits, wait a few seconds before restarting
+    echo "Browser exited. Restarting in 5 seconds..."
+    sleep 5
+done

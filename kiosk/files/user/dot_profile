@@ -1,0 +1,41 @@
+# salt/kiosk/files/user/dot_profile
+# This file is managed by SaltStack. Do not edit manually.
+
+# ~/.profile: executed by the command interpreter for login shells.
+
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists. See /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private .local/bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+# --- KIOSK STARTUP ---
+# Automatically start the X server if on tty1 and no X server is running
+if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+  echo "Attempting to start X session..." > /tmp/kiosk_startup.log
+  # Try to start X. If it fails, prevent a login loop.
+  startx 2> /tmp/x_error.log || echo "Failed to start X session. Check logs." && sleep 5
+  # Optional: logout after startx finishes (though .xinitrc loops)
+  # logout
+fi
+# --- END KIOSK STARTUP ---
