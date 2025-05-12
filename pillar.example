@@ -14,14 +14,20 @@ kiosk:
   vnc_display_port: 5900     # Internal port x11vnc listens on (localhost)
 
   power:
-    enabled: True # Enable power management (shutdown, reboot, etc.)
-    shutdown_time: 22 # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
-    shutdown_time_minute: 0 # Minute to shutdown (0 for the top of the hour)
+    enabled: True              # Enable power management (shutdown, reboot, etc.)
+    shutdown_time: 22          # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
+    shutdown_time_minute: 0    # Minute to shutdown (0 for the top of the hour)
+    shutdown_daymonth: '*'     # Day of month (1-31 or *)
+    shutdown_month: '*'        # Month (1-12 or *)
+    shutdown_dayweek: '*'      # Day of week (0-6 or *)
 
   rtcwake:
     enabled: False
-    mode: off # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
-    start_hour: 18    # Start rtcwake at 6 PM
+    mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+    start_hour: 18            # Start rtcwake at 6 PM
     start_minute: 0
-    duration: 43200 # Wake up after 12 hours (in seconds)
+    start_daymonth: '*'       # Day of month (1-31 or *)
+    start_month: '*'          # Month (1-12 or *)
+    start_dayweek: '*'        # Day of week (0-6 or *)
+    duration: 43200           # Wake up after 12 hours (in seconds)
     

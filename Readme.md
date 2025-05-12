@@ -41,16 +41,22 @@ kiosk:
   #############################
   power:
     enabled: True
-    shutdown_time: 22       # 24h format
+    shutdown_time: 22          # 24h format
     shutdown_time_minute: 0
+    shutdown_daymonth: '*'     # Day of month (1-31 or *)
+    shutdown_month: '*'        # Month (1-12 or *)
+    shutdown_dayweek: '*'      # Day of week (0-6 or *)
 
   # ---- or ----
   rtcwake:
     enabled: True
-    mode: off # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
-    start_hour: 18    # Start rtcwake at 6 PM
+    mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+    start_hour: 18            # Start rtcwake at 6 PM
     start_minute: 0
-    duration: 43200 # Wake up after 12 hours (in seconds)
+    start_daymonth: '*'       # Day of month (1-31 or *)
+    start_month: '*'          # Month (1-12 or *)
+    start_dayweek: '*'        # Day of week (0-6 or *)
+    duration: 43200           # Wake up after 12 hours (in seconds)
 ```
 
 You can find a full example in `.\pillar.example`. You will any default values in `.\kiosk\defaults.yaml`.
