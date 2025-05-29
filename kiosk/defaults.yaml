@@ -5,25 +5,38 @@ kiosk:
 
   additionalChromeArgs: ""
 
+  chromeKioskMode: True  # Enable Chrome kiosk mode
+
+  disable_unused_ttys: True  # Disable unused TTYs to prevent access to the system
+
   # -- VNC Setup --
   novnc_port: 6080           # Port for the noVNC web interface (will bind to localhost)
   vnc_display_port: 5900     # Internal port x11vnc listens on (localhost)
 
-  power:
-    enabled: False             # Enable power management (shutdown, reboot, etc.)
-    shutdown_time: 22          # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
-    shutdown_time_minute: 0    # Minute to shutdown (0 for the top of the hour)
-    shutdown_daymonth: '*'     # Day of month (1-31 or *)
-    shutdown_month: '*'        # Month (1-12 or *)
-    shutdown_dayweek: '*'      # Day of week (0-6 or *)
+  power: {}
+    # my_schedule1:
+      # enabled: False             # Enable power management (shutdown, reboot, etc.)
+      # shutdown_time: 22          # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
+      # shutdown_time_minute: 0    # Minute to shutdown (0 for the top of the hour)
+      # shutdown_daymonth: '*'     # Day of month (1-31 or *)
+      # shutdown_month: '*'        # Month (1-12 or *)
+      # shutdown_dayweek: '*'      # Day of week (0-6 or *)
 
-  rtcwake:
-    enabled: False
-    mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
-    start_hour: 18            # Start rtcwake at 6 PM
-    start_minute: 0
-    start_daymonth: '*'       # Day of month (1-31 or *)
-    start_month: '*'          # Month (1-12 or *)
-    start_dayweek: '*'        # Day of week (0-6 or *)
-    duration: 43200 # Wake up after 12 hours (in seconds)
+  rtcwake: {}
+    # my_schedule1:
+      # enabled: False
+      # mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+      # start_hour: 18            # Start rtcwake at 6 PM
+      # start_minute: 0
+      # start_daymonth: '*'       # Day of month (1-31 or *)
+      # start_month: '*'          # Month (1-12 or *)
+      # start_dayweek: '*'        # Day of week (0-6 or *)
+      # duration: 43200 # Wake up after 12 hours (in seconds)
+
+   # Screen power management
+  screen_power_management:
+    enabled: False              # Enable screen power management
+    blank_time: 20             # Minutes of inactivity before blanking screen
+    poweroff_time: 30          # Minutes of inactivity before turning off screen
+    # Both times are in minutes. poweroff_time should be greater than blank_time
     

@@ -6,3 +6,4 @@ include:
   - kiosk.vnc
   - kiosk.power
   - kiosk.branding
+  - kiosk.tty

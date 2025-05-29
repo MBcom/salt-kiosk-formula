@@ -2,8 +2,14 @@
 # salt/kiosk/files/user/dot_xinitrc
 # This file is managed by SaltStack. Do not edit manually.
 
-# Disable screen blanking and power management for the display
+# Screen power management settings
+{% if screenPowerManagement %}
+xset +dpms
+xset dpms {{ blank_time * 60 }} {{ blank_time * 60 }} {{ poweroff_time * 60 }}
+{% else %}
+# Disable screen blanking and power management
 xset s off -dpms
+{% endif %}
 
 GEO="$(xdpyinfo -display :0 | grep dimensions | grep -oE '[0-9]+x[0-9]+' | head -1)"
 WIDTH=$(echo "$GEO" | awk -F'x' '{print $1}')
@@ -13,7 +19,7 @@ echo "Resolution: $WIDTH x $HEIGHT"
 
 BROWSER_CMD="google-chrome-stable"
 # Add flags like --incognito, --disable-translate, --no-default-browser-check if needed
-BROWSER_ARGS="--window-position=0,0 --window-size=$WIDTH,$HEIGHT --kiosk --start-maximized --no-first-run --disable-features=Translate {{ additionalChromeArgs }}"
+BROWSER_ARGS="--window-position=0,0 --window-size=$WIDTH,$HEIGHT {{ kioskmode }} --start-maximized --no-first-run --disable-features=Translate {{ additionalChromeArgs }}"
 
 START_URL="{{ startUrl }}"
 

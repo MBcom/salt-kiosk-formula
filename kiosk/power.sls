@@ -3,46 +3,50 @@
 
 # Ensure cron package is installed (handled by packages.sls)
 # kiosk_base_packages: ...
-{% if kiosk.power.enabled %}
-# Add cron job for root user to shutdown at 10 PM (22:00) daily
+{%- for key,value in kiosk.power.items() %}
+{%-   if value.enabled %}
+# Add cron job for scheduled shutdown
 scheduled_shutdown:
   cron.present:
     - name: /sbin/poweroff # Use poweroff or shutdown -h now
     - user: root
-    - minute: "{{ kiosk.power.shutdown_time_minute }}"
-    - hour: "{{ kiosk.power.shutdown_time }}"
-    - daymonth: "{{ kiosk.power.shutdown_daymonth }}"
-    - month: "{{ kiosk.power.shutdown_month }}"
-    - dayweek: "{{ kiosk.power.shutdown_dayweek }}"
-    - identifier: KIOSK_AUTO_SHUTDOWN
+    - minute: "{{ value.shutdown_time_minute }}"
+    - hour: "{{ value.shutdown_time }}"
+    - daymonth: "{{ value.shutdown_daymonth }}"
+    - month: "{{ value.shutdown_month }}"
+    - dayweek: "{{ value.shutdown_dayweek }}"
+    - identifier: KIOSK_AUTO_SHUTDOWN_{{ key }}
     - require:
       - pkg: kiosk_base_packages # Ensure cron is installed
-{% else %}
+{%-   else %}
 # Remove shutdown cron job if disabled
 scheduled_shutdown:
   cron.absent:
-    - identifier: KIOSK_AUTO_SHUTDOWN
+    - identifier: KIOSK_AUTO_SHUTDOWN_{{ key }}
     - user: root
-{% endif %}
+{%-   endif %}
+{%- endfor %}
 
-{% if kiosk.rtcwake.enabled %}
+{%- for key,value in kiosk.rtcwake.items() %}
+{%-   if value.enabled %}
 # Schedule wake from hibernate
 scheduled_wake:
   cron.present:
-    - name: /usr/sbin/rtcwake -m {{ kiosk.rtcwake.mode }} -s {{ kiosk.rtcwake.duration }}
+    - name: /usr/sbin/rtcwake -m {{ value.mode }} -s {{ value.duration }}
     - user: root
-    - minute: "{{ kiosk.rtcwake.start_minute }}"
-    - hour: "{{ kiosk.rtcwake.start_hour }}"
-    - daymonth: "{{ kiosk.rtcwake.start_daymonth }}"
-    - month: "{{ kiosk.rtcwake.start_month }}"
-    - dayweek: "{{ kiosk.rtcwake.start_dayweek }}"
-    - identifier: KIOSK_HIBERNATE_WAKE
+    - minute: "{{ value.start_minute }}"
+    - hour: "{{ value.start_hour }}"
+    - daymonth: "{{ value.start_daymonth }}"
+    - month: "{{ value.start_month }}"
+    - dayweek: "{{ value.start_dayweek }}"
+    - identifier: KIOSK_HIBERNATE_WAKE_{{ key }}
     - require:
       - pkg: kiosk_base_packages
-{% else %}
+{%-   else %}
 # Remove rtcwake cron job if disabled
 scheduled_wake:
   cron.absent:
-    - identifier: KIOSK_HIBERNATE_WAKE
+    - identifier: KIOSK_HIBERNATE_WAKE_{{ key }}
     - user: root
-{% endif %}
+{%-   endif %}
+{%- endfor %}

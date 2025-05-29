@@ -12,6 +12,8 @@ A SaltStack formula to configure plain Debian PCs machines as kiosk devices with
 - X11 session autostart
 - no need to install a GUI in debian
 - small ressource foot print - does not use any display manager
+- Optional screen power saving
+- Optional turn off kiosk mode to create browser only work stations
   
 **Do you also looking for an web app to centrally manage your kiosk screens?** Have a look at [Kiosk Manager](https://github.com/MBcom/kioskmanager). It's also open source ;)  
   
@@ -40,23 +42,25 @@ kiosk:
   # Optional: Power management
   #############################
   power:
-    enabled: True
-    shutdown_time: 22          # 24h format
-    shutdown_time_minute: 0
-    shutdown_daymonth: '*'     # Day of month (1-31 or *)
-    shutdown_month: '*'        # Month (1-12 or *)
-    shutdown_dayweek: '*'      # Day of week (0-6 or *)
+    my_schedule1:
+      enabled: True
+      shutdown_time: 22          # 24h format
+      shutdown_time_minute: 0
+      shutdown_daymonth: '*'     # Day of month (1-31 or *)
+      shutdown_month: '*'        # Month (1-12 or *)
+      shutdown_dayweek: '*'      # Day of week (0-6 or *)
 
   # ---- or ----
   rtcwake:
-    enabled: True
-    mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
-    start_hour: 18            # Start rtcwake at 6 PM
-    start_minute: 0
-    start_daymonth: '*'       # Day of month (1-31 or *)
-    start_month: '*'          # Month (1-12 or *)
-    start_dayweek: '*'        # Day of week (0-6 or *)
-    duration: 43200           # Wake up after 12 hours (in seconds)
+    my_schedule1:
+      enabled: True
+      mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+      start_hour: 18            # Start rtcwake at 6 PM
+      start_minute: 0
+      start_daymonth: '*'       # Day of month (1-31 or *)
+      start_month: '*'          # Month (1-12 or *)
+      start_dayweek: '*'        # Day of week (0-6 or *)
+      duration: 43200           # Wake up after 12 hours (in seconds)
 ```
 
 You can find a full example in `.\pillar.example`. You will any default values in `.\kiosk\defaults.yaml`.
@@ -84,6 +88,31 @@ You can find a full example in `.\pillar.example`. You will any default values i
 - Configurable shutdown time
 - Optional enable/disable
 - rtcwake support - power down your kiosk for a given time period
+
+### Screen Power Management
+- Optional screen power saving
+- Configurable screen blank time
+- Configurable screen power off time
+- Automatic reactivation on mouse/keyboard activity
+
+### Browser Work station
+You can set `chromeKioskMode: False` in your Pillar to show Google Chrome as normal but without the ability to minimize or close the window.  
+You can use this method to support work environments which entirely run on the web.  
+I would recommend to turn on private mode by setting `additionalChromeArgs: "--incognito --disable-features=PasswordManager"` in your Pillar to prevent users from storing passwords if the work stations are used by different employees.
+
+Configuration example:
+```yaml
+kiosk:
+  screen_power_management:
+    enabled: True               # Enable screen power management
+    blank_time: 20             # Minutes before screen blanking
+    poweroff_time: 30          # Minutes before turning off screen
+```
+
+The screen will:
+1. Blank after specified minutes of inactivity
+2. Turn off after specified minutes of inactivity
+3. Automatically turn back on with any keyboard or mouse activity
 
 ## Usage
 

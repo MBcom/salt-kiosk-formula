@@ -19,6 +19,10 @@ kiosk_user_xinitrc:
     - context:
         startUrl: {{ start_url }}
         additionalChromeArgs: "{{ additionalChromeArgs }}"
+        kioskmode: {% if kiosk.chromeKioskMode %}"--kiosk"{% else %}""{% endif %}
+        screenPowerManagement: {{ kiosk.screen_power_management.enabled }}
+        blank_time: {{ kiosk.screen_power_management.blank_time }}
+        poweroff_time: {{ kiosk.screen_power_management.poweroff_time }}
         
     - require:
       - user: kiosk_user_account

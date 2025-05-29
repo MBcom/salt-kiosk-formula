@@ -13,7 +13,6 @@ User={{ kiosk_user }}
 Group={{ kiosk_user }}
 
 Environment=DISPLAY=:0
-# Environment=XAUTHORITY={{ pillar.kiosk.user_home }}/.Xauthority # Usually not needed
 
 
 # Run x11vnc attached to the primary display (:0)

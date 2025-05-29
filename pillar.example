@@ -4,6 +4,9 @@ kiosk:
   user_home: /home/kioskuser
   user_password: "mein-pw" # CHANGE THIS!
 
+  chromeKioskMode: True # Start Chrome with --kiosk flag
+  disable_unused_ttys: True # disable tty 2 -7
+
   # Default URL to load
   start_url: "https://www.google.com" # Change to your desired start page
   # additionalChromeArgs: "--incognito --disable-infobars --disable-features=PasswordManager" # Additional arguments for Chrome (optional)
@@ -14,20 +17,37 @@ kiosk:
   vnc_display_port: 5900     # Internal port x11vnc listens on (localhost)
 
   power:
-    enabled: True              # Enable power management (shutdown, reboot, etc.)
-    shutdown_time: 22          # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
-    shutdown_time_minute: 0    # Minute to shutdown (0 for the top of the hour)
-    shutdown_daymonth: '*'     # Day of month (1-31 or *)
-    shutdown_month: '*'        # Month (1-12 or *)
-    shutdown_dayweek: '*'      # Day of week (0-6 or *)
+    weekdays_schedule:
+      enabled: True              # Enable power management (shutdown, reboot, etc.)
+      shutdown_time: 22          # Time to shutdown (24-hour format, e.g., 22 for 10 PM)
+      shutdown_time_minute: 0    # Minute to shutdown (0 for the top of the hour)
+      shutdown_daymonth: '*'     # Day of month (1-31 or *)
+      shutdown_month: '*'        # Month (1-12 or *)
+      shutdown_dayweek: '*'      # Day of week (0-6 or *)
 
   rtcwake:
-    enabled: False
-    mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
-    start_hour: 18            # Start rtcwake at 6 PM
-    start_minute: 0
-    start_daymonth: '*'       # Day of month (1-31 or *)
-    start_month: '*'          # Month (1-12 or *)
-    start_dayweek: '*'        # Day of week (0-6 or *)
-    duration: 43200           # Wake up after 12 hours (in seconds)
-    
+    weekdays_schedule:
+      enabled: False
+      mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+      start_hour: 18            # Start rtcwake at 6 PM
+      start_minute: 0
+      start_daymonth: '*'       # Day of month (1-31 or *)
+      start_month: '*'          # Month (1-12 or *)
+      start_dayweek: '0-5'        # Day of week (0-6 or *)
+      duration: 43200           # Wake up after 12 hours (in seconds)
+    weekend_schedule:
+      enabled: False
+      mode: "off"                 # Possible values: freeze, standby, mem, disk, off  See https://wiki.ubuntuusers.de/rtcwake/#Optionen
+      start_hour: 18            # Start rtcwake at 6 PM
+      start_minute: 0
+      start_daymonth: '*'       # Day of month (1-31 or *)
+      start_month: '*'          # Month (1-12 or *)
+      start_dayweek: '6'        # Day of week (0-6 or *)
+      duration: 43200           # Wake up after 12 hours (in seconds)
+
+  # Screen power management
+  screen_power_management:
+    enabled: False              # Enable screen power management
+    blank_time: 20             # Minutes of inactivity before blanking screen
+    poweroff_time: 30          # Minutes of inactivity before turning off screen
+    # Both times are in minutes. poweroff_time should be greater than blank_time
