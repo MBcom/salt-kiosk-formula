@@ -6,6 +6,19 @@
 {% set start_url = kiosk.start_url %}
 {% set additionalChromeArgs = kiosk.additionalChromeArgs %}
 
+# load kiosk.chromePolicies and store them to /etc/opt/chrome/policies/managed/kiosk.json
+{% if kiosk.chromePolicies %}
+kiosk_chrome_policies:
+  file.managed:
+    - name: /etc/opt/chrome/policies/managed/kiosk.json
+    - user: root
+    - group: root
+    - mode: 644
+    - template: jinja
+    - makedirs: True
+    - contents: |
+        {{ kiosk.chromePolicies | tojson }}
+{% endif %}
 
 # Create the .xinitrc file in the kiosk user's home directory
 kiosk_user_xinitrc:
@@ -23,6 +36,7 @@ kiosk_user_xinitrc:
         screenPowerManagement: {{ kiosk.screen_power_management.enabled }}
         blank_time: {{ kiosk.screen_power_management.blank_time }}
         poweroff_time: {{ kiosk.screen_power_management.poweroff_time }}
+        displays: {{ kiosk.displays }}
         
     - require:
       - user: kiosk_user_account

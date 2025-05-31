@@ -5,6 +5,14 @@ kiosk:
 
   additionalChromeArgs: ""
 
+  # URL to load on all displays (used when no `displays` setting configured)
+  # start_url: "https://www.google.com"
+  # --- or ---
+  # Optional: Configure specific URLs for each display
+  displays: []
+    # - startUrl: "https://example.com/dashboard1"
+    # - startUrl: "https://example.com/dashboard2" 
+
   chromeKioskMode: True  # Enable Chrome kiosk mode
 
   disable_unused_ttys: True  # Disable unused TTYs to prevent access to the system
@@ -39,4 +47,51 @@ kiosk:
     blank_time: 20             # Minutes of inactivity before blanking screen
     poweroff_time: 30          # Minutes of inactivity before turning off screen
     # Both times are in minutes. poweroff_time should be greater than blank_time
+  
+  # -- Chrome Setup --
+  # See https://github.com/google/ChromeBrowserEnterprise/blob/main/docs/policy_examples/managed_policies.json for an example of Chrome policies
+  # and https://chromeenterprise.google/policies/ for futher reference.
+  chromePolicies: 
+    AutoplayAllowed: true  # Allow autoplay of media
+    DownloadRestrictions: 3 # Restrict downloads (0 = No special restrictions. Default. 1 = Block malicious downloads and dangerous file types. 2 = Block malicious downloads, uncommon or unwanted downloads and dangerous file types. 3 = Block all downloads. 4 = Block malicious downloads. Recommended.)
+    EditBookmarksEnabled: false # Disable editing bookmarks
+    PrintingEnabled: false # Disable printing
+    # {
+    #   "HomepageLocation": "https://www.google.com",
+    #   "HomepageIsNewTabPage": false,
+    #   "DefaultBrowserSettingEnabled": true,
+    #   "RestoreOnStartup": 1,
+    #   "SafeBrowsingProtectionLevel": 1,
+    #   "MaxConnectionsPerProxy": 99,
+    #   "ExtensionInstallForcelist": [
+    #     "noondiphcddnnabmjcihcjfbhfklnnep",
+    #     "djflhoibgkdhkhhcedjiklpkjnoahfmg"
+    #   ],
+    #   "ManagedBookmarks": [
+    #     {
+    #       "toplevel_name": "My managed bookmarks folder"
+    #     },
+    #     {
+    #       "name": "Google",
+    #       "url": "google.com"
+    #     },
+    #     {
+    #       "name": "Youtube",
+    #       "url": "youtube.com"
+    #     },
+    #     {
+    #       "children": [
+    #         {
+    #           "name": "Chromium",
+    #           "url": "chromium.org"
+    #         },
+    #         {
+    #           "name": "Chromium Developers",
+    #           "url": "dev.chromium.org"
+    #         }
+    #       ],
+    #       "name": "Chrome links"
+    #     }
+    #   ]
+    # }
     

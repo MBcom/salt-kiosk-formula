@@ -2,6 +2,10 @@
 # salt/kiosk/files/user/dot_xinitrc
 # This file is managed by SaltStack. Do not edit manually.
 
+# File to store window IDs
+WINDOW_FILE="/tmp/kiosk_windows.dat"
+> "$WINDOW_FILE"  # Clear window file on startup
+
 # Screen power management settings
 {% if screenPowerManagement %}
 xset +dpms
@@ -11,15 +15,101 @@ xset dpms {{ blank_time * 60 }} {{ blank_time * 60 }} {{ poweroff_time * 60 }}
 xset s off -dpms
 {% endif %}
 
-GEO="$(xdpyinfo -display :0 | grep dimensions | grep -oE '[0-9]+x[0-9]+' | head -1)"
-WIDTH=$(echo "$GEO" | awk -F'x' '{print $1}')
-HEIGHT=$(echo "$GEO" | awk -F'x' '{print $2}')
+# Function to get the last Chrome window ID
+get_last_window_id() {
+    # Get the last Chrome window ID using xdotool
+    local last_window_id=$(xdotool search --onlyvisible --class "Google-chrome" | tail -n 1)
+    echo "$last_window_id"
+}
 
-echo "Resolution: $WIDTH x $HEIGHT"
+# Function to get connected displays and their resolutions
+get_displays() {
+    xrandr --query | grep " connected" | while read -r line; do
+        display_name=$(echo "$line" | cut -d' ' -f1)
+        # Extract resolution and position (e.g., 1440x900+0+0)
+        geometry=$(echo "$line" | grep -oP '\d+x\d+\+\d+\+\d+')
+        if [ -n "$geometry" ]; then
+            # Split into resolution and position
+            resolution=$(echo "$geometry" | cut -d'+' -f1)
+            offset_x=$(echo "$geometry" | cut -d'+' -f2)
+            offset_y=$(echo "$geometry" | cut -d'+' -f3)
+            echo "$display_name $resolution $offset_x $offset_y"
+        fi
+    done
+}
+
+# Function to start browser on a specific display
+start_browser() {
+    local display=$1
+    local url=$2
+    local width=$3
+    local height=$4
+    local offset_x=$5
+    local offset_y=$6
+    
+    if [ -n "$width" ]; then
+        echo "Starting browser on $display ($width x $height) at position ($offset_x,$offset_y) with URL: $url" >> /tmp/kiosk_startup.log
+        
+        DISPLAY=:0 $BROWSER_CMD \
+            --window-position=$offset_x,$offset_y \
+            --window-size=$width,$height \
+            {{ kioskmode }} \
+            --start-maximized \
+            --no-first-run \
+            --new-window \
+            --disable-features=Translate \
+            {{ additionalChromeArgs }} \
+            "$url" 2>> /tmp/kiosk_error.log &
+
+        sleep 2  # Allow time for the browser to start
+        local window_id=$(get_last_window_id)
+
+        # Move window to correct position
+        xdotool windowmove $window_id $offset_x $offset_y
+        xdotool windowsize $window_id $width $height
+            
+        # Store window info
+        echo "${display}:${window_id}" >> "$WINDOW_FILE"
+    else
+        echo "Failed to start browser on $display: Resolution not found." >> /tmp/kiosk_startup.log
+    fi
+}
+
+# Function to check if window still exists and is in correct position
+check_window() {
+    local wid=$1
+    local expected_x=$2
+    local expected_y=$3
+    local expected_width=$4
+    local expected_height=$5
+
+    # First check if window exists
+    if ! xdotool getwindowname $wid >/dev/null 2>&1; then
+        return 1
+    fi
+
+    # Get current window position and size
+    local geometry
+    geometry=$(xdotool getwindowgeometry $wid)
+    local current_x=$(echo "$geometry" | grep Position | grep -oP '\d+,\d+' | cut -d',' -f1)
+    local current_y=$(echo "$geometry" | grep Position | grep -oP '\d+,\d+' | cut -d',' -f2)
+    local current_width=$(echo "$geometry" | grep Geometry | grep -oP '\d+x\d+' | cut -d'x' -f1)
+    local current_height=$(echo "$geometry" | grep Geometry | grep -oP '\d+x\d+' | cut -d'x' -f2)
+
+    # Check if position or size has changed
+    if [ "$current_x" != "$expected_x" ] || \
+       [ "$current_y" != "$expected_y" ] || \
+       [ "$current_width" != "$expected_width" ] || \
+       [ "$current_height" != "$expected_height" ]; then
+        echo "Window $wid position changed, repositioning..." >> /tmp/kiosk_startup.log
+        xdotool windowmove $wid $expected_x $expected_y
+        xdotool windowsize $wid $expected_width $expected_height
+    fi
+
+    return 0
+}
 
 BROWSER_CMD="google-chrome-stable"
-# Add flags like --incognito, --disable-translate, --no-default-browser-check if needed
-BROWSER_ARGS="--window-position=0,0 --window-size=$WIDTH,$HEIGHT {{ kioskmode }} --start-maximized --no-first-run --disable-features=Translate {{ additionalChromeArgs }}"
 
 START_URL="{{ startUrl }}"
 
@@ -35,13 +125,69 @@ while ! check_internet; do
     sleep 5
 done
 
-# Loop forever, relaunching the browser if it crashes or is somehow closed
-while true; do
-    echo "Starting browser: $BROWSER_CMD $BROWSER_ARGS $START_URL" >> /tmp/kiosk_startup.log
-    # Run the browser
-    $BROWSER_CMD $BROWSER_ARGS "$START_URL" 2>> /tmp/kiosk_error.log
+# Create arrays for URLs from pillar data
+{% if displays %}
+declare -a URL_LIST=(
+{%- for display in displays %}
+    "{{ display.startUrl }}"
+{%- endfor %}
+)
+{% endif %}
 
-    # If the browser exits, wait a few seconds before restarting
-    echo "Browser exited. Restarting in 5 seconds..."
-    sleep 5
+# Start browsers on displays
+readarray -t DISPLAYS < <(get_displays)
+for i in "${!DISPLAYS[@]}"; do
+    display_info=(${DISPLAYS[$i]})
+    display_name=${display_info[0]}
+    resolution=${display_info[1]}
+    offset_x=${display_info[2]}
+    offset_y=${display_info[3]}
+
+    width=$(echo "$resolution" | cut -d'x' -f1)
+    height=$(echo "$resolution" | cut -d'x' -f2)
+    
+    # Use URL from list if available, otherwise use default
+    url="${URL_LIST[$i]:-$START_URL}"
+    start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
+done
+
+sleep 5  # Allow time for all browsers to start
+
+# Monitor and restart browsers if they crash
+while true; do
+    sleep 1
+    
+    readarray -t CURRENT_DISPLAYS < <(get_displays)
+    for i in "${!CURRENT_DISPLAYS[@]}"; do
+        display_info=(${CURRENT_DISPLAYS[$i]})
+        display_name=${display_info[0]}
+        resolution=${display_info[1]}
+        offset_x=${display_info[2]}
+        offset_y=${display_info[3]}
+
+        width=$(echo "$resolution" | cut -d'x' -f1)
+        height=$(echo "$resolution" | cut -d'x' -f2)
+        
+        # Use URL from list if available, otherwise use default
+        url="${URL_LIST[$i]:-$START_URL}"
+        
+        # Check if browser is running for this display
+        browser_running=false
+        while IFS=: read -r stored_display window_id; do
+            if [ "$stored_display" = "$display_name" ]; then
+                if check_window "$window_id" "$offset_x" "$offset_y" "$width" "$height"; then
+                    browser_running=true
+                else
+                    # Remove dead window ID from the file
+                    sed -i "/$stored_display:$window_id/d" "$WINDOW_FILE"
+                fi
+            fi
+        done < "$WINDOW_FILE"
+        
+        if [ "$browser_running" = false ]; then
+            echo "Browser on display $display_name exited. Restarting..." >> /tmp/kiosk_startup.log
+            start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
+            sleep 5 # Allow time for the browser to start
+        fi
+    done
 done

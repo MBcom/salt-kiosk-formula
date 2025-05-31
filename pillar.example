@@ -51,3 +51,43 @@ kiosk:
     blank_time: 20             # Minutes of inactivity before blanking screen
     poweroff_time: 30          # Minutes of inactivity before turning off screen
     # Both times are in minutes. poweroff_time should be greater than blank_time
+
+  # -- Chrome Setup --
+  # See https://github.com/google/ChromeBrowserEnterprise/blob/main/docs/policy_examples/managed_policies.json for an example of Chrome policies
+  # and https://chromeenterprise.google/policies/ for futher reference.
+  chromePolicies:
+    {
+      "DefaultBrowserSettingEnabled": true,
+      "RestoreOnStartup": 0,
+      "SafeBrowsingProtectionLevel": 1,
+      "MaxConnectionsPerProxy": 99,
+      "ExtensionInstallForcelist": [
+      ],
+      "BookmarkBarEnabled": true,
+      "ManagedBookmarks": [
+        {
+          "toplevel_name": "My managed bookmarks folder"
+        },
+        {
+          "name": "Google",
+          "url": "google.com"
+        },
+        {
+          "name": "Youtube",
+          "url": "youtube.com"
+        },
+        {
+          "children": [
+            {
+              "name": "Chromium",
+              "url": "chromium.org"
+            },
+            {
+              "name": "Chromium Developers",
+              "url": "dev.chromium.org"
+            }
+          ],
+          "name": "Chrome links"
+        }
+      ]
+    }

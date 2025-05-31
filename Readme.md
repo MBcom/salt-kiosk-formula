@@ -14,6 +14,7 @@ A SaltStack formula to configure plain Debian PCs machines as kiosk devices with
 - small ressource foot print - does not use any display manager
 - Optional screen power saving
 - Optional turn off kiosk mode to create browser only work stations
+- Support for [Chrome polcies](https://support.google.com/chrome/a/answer/9027408?hl=en) to manage Google Chrome Browser settings like bookmarks etc.
   
 **Do you also looking for an web app to centrally manage your kiosk screens?** Have a look at [Kiosk Manager](https://github.com/MBcom/kioskmanager). It's also open source ;)  
   
@@ -98,8 +99,13 @@ You can find a full example in `.\pillar.example`. You will any default values i
 ### Browser Work station
 You can set `chromeKioskMode: False` in your Pillar to show Google Chrome as normal but without the ability to minimize or close the window.  
 You can use this method to support work environments which entirely run on the web.  
-I would recommend to turn on private mode by setting `additionalChromeArgs: "--incognito --disable-features=PasswordManager"` in your Pillar to prevent users from storing passwords if the work stations are used by different employees.
-
+I would recommend to turn on private mode by setting `additionalChromeArgs: "--incognito --disable-features=PasswordManager"` in your Pillar to prevent users from storing passwords if the work stations are used by different employees.  
+  
+You can also set `chromePolicies` to a Google Chrome Policy JSON or YAML.
+You can look for an example [here](https://github.com/google/ChromeBrowserEnterprise/blob/main/docs/policy_examples/managed_policies.json).
+The documentation can be found [here](https://chromeenterprise.google/policies/).
+This allows you to also set bookmarks or install specific extensions.  
+  
 Configuration example:
 ```yaml
 kiosk:
@@ -159,6 +165,7 @@ Note: These logs are cleared during system startup.
 - power.sls: Power management
 - user.sls: User account setup
 - autologin.sls: Automatic login configuration
+- tty.sls: TTY management
 
 ## Customization
 

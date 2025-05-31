@@ -13,6 +13,7 @@ kiosk_base_packages:
       - fonts-liberation
       - fonts-dejavu-core
       - wget
+      - xdotool
 
 # --- Browser Installation ---
 
