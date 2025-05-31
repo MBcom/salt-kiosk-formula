@@ -15,6 +15,28 @@ xset dpms {{ blank_time * 60 }} {{ blank_time * 60 }} {{ poweroff_time * 60 }}
 xset s off -dpms
 {% endif %}
 
+# Function to start clock
+start_clock() {
+    local display_width=$1
+    local display_height=$2
+    local offset_x=$3
+    local offset_y=$4
+    
+    # Calculate position (centered at bottom)
+    local clock_width=200  # Fixed width for clock
+    local clock_x=$((offset_x + (display_width - clock_width) / 2))  # Center horizontally
+    local clock_y=$((display_height - {{ clock.height }}))
+    
+    # Clear previous clock
+    xsetroot -solid "{{ clock.bgcolor }}"
+    
+    # Display clock using xclock
+    xclock -digital -strftime "{{ clock.format }}" \
+        -fg "{{ clock.color }}" -bg "{{ clock.bgcolor }}" \
+        -geometry "${display_width}x{{ clock.height }}+${clock_x}+${clock_y}" \
+        -face "{{ clock.font }}" &
+}
+
 # Function to get the last Chrome window ID
 get_last_window_id() {
     # Get the last Chrome window ID using xdotool
@@ -46,6 +68,11 @@ start_browser() {
     local height=$4
     local offset_x=$5
     local offset_y=$6
+
+    {% if clock.enabled %}
+    # Adjust height for clock
+    height=$((height - {{ clock.height }}))
+    {% endif %}
     
     if [ -n "$width" ]; then
         echo "Starting browser on $display ($width x $height) at position ($offset_x,$offset_y) with URL: $url" >> /tmp/kiosk_startup.log
@@ -61,7 +88,7 @@ start_browser() {
             {{ additionalChromeArgs }} \
             "$url" 2>> /tmp/kiosk_error.log &
 
-        sleep 2  # Allow time for the browser to start
+        sleep 5  # Allow time for the browser to start
         local window_id=$(get_last_window_id)
 
         # Move window to correct position
@@ -87,6 +114,11 @@ check_window() {
     if ! xdotool getwindowname $wid >/dev/null 2>&1; then
         return 1
     fi
+
+    {% if clock.enabled %}
+    # Adjust height for clock
+    expected_height=$((expected_height - {{ clock.height }}))
+    {% endif %}
 
     # Get current window position and size
     local geometry
@@ -149,9 +181,11 @@ for i in "${!DISPLAYS[@]}"; do
     # Use URL from list if available, otherwise use default
     url="${URL_LIST[$i]:-$START_URL}"
     start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
-done
 
-sleep 5  # Allow time for all browsers to start
+    {% if clock.enabled %}
+    start_clock "$width" "$height" "$offset_x" "$offset_y"
+    {% endif %}
+done
 
 # Monitor and restart browsers if they crash
 while true; do
@@ -187,7 +221,6 @@ while true; do
         if [ "$browser_running" = false ]; then
             echo "Browser on display $display_name exited. Restarting..." >> /tmp/kiosk_startup.log
             start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
-            sleep 5 # Allow time for the browser to start
         fi
     done
 done

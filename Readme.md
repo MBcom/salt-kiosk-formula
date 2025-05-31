@@ -12,9 +12,11 @@ A SaltStack formula to configure plain Debian PCs machines as kiosk devices with
 - X11 session autostart
 - no need to install a GUI in debian
 - small ressource foot print - does not use any display manager
+- supports multiple displays
 - Optional screen power saving
 - Optional turn off kiosk mode to create browser only work stations
 - Support for [Chrome polcies](https://support.google.com/chrome/a/answer/9027408?hl=en) to manage Google Chrome Browser settings like bookmarks etc.
+- Optional display the current time on screen
   
 **Do you also looking for an web app to centrally manage your kiosk screens?** Have a look at [Kiosk Manager](https://github.com/MBcom/kioskmanager). It's also open source ;)  
   
@@ -96,6 +98,19 @@ You can find a full example in `.\pillar.example`. You will any default values i
 - Configurable screen power off time
 - Automatic reactivation on mouse/keyboard activity
 
+### Multi display support
+You can attach multiple displays on your kiosk device.  
+You can show the same url on all or define `displays` variable to show different pages on your screens.  
+  
+Configuration example:  
+```yaml
+displays:
+  - startUrl: "https://example.com/dashboard1"
+  - startUrl: "https://example.com/dashboard2" 
+```
+
+Just set `start_url` property to show the same url on all screens.
+
 ### Browser Work station
 You can set `chromeKioskMode: False` in your Pillar to show Google Chrome as normal but without the ability to minimize or close the window.  
 You can use this method to support work environments which entirely run on the web.  
@@ -119,6 +134,17 @@ The screen will:
 1. Blank after specified minutes of inactivity
 2. Turn off after specified minutes of inactivity
 3. Automatically turn back on with any keyboard or mouse activity
+
+### Display a clock
+This formula allows you to display a clock of center bottom of all displays.
+This can be useful if your employees work at these kiosk devices and need to know how late it is to not miss their breaks.  
+
+Configuration example:
+```yaml
+  clock:
+    enabled: True
+```  
+See [pillar.example](pillar.example) file to see how to style this clock.  
 
 ## Usage
 

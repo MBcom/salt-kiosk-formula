@@ -37,6 +37,13 @@ kiosk_user_xinitrc:
         blank_time: {{ kiosk.screen_power_management.blank_time }}
         poweroff_time: {{ kiosk.screen_power_management.poweroff_time }}
         displays: {{ kiosk.displays }}
+        clock:
+          enabled: "{{ kiosk.clock.enabled }}"
+          format: "{{ kiosk.clock.format }}"
+          height: "{{ kiosk.clock.height }}"
+          font: "{{ kiosk.clock.font }}"
+          color: "{{ kiosk.clock.color }}"
+          bgcolor: "{{ kiosk.clock.bgcolor }}"
         
     - require:
       - user: kiosk_user_account

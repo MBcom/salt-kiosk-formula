@@ -6,7 +6,7 @@ kiosk:
   additionalChromeArgs: ""
 
   # URL to load on all displays (used when no `displays` setting configured)
-  # start_url: "https://www.google.com"
+  start_url: "https://example.com"
   # --- or ---
   # Optional: Configure specific URLs for each display
   displays: []
@@ -95,3 +95,12 @@ kiosk:
     #   ]
     # }
     
+
+  # GUI Clock settings
+  clock:
+    enabled: False
+    format: "%H:%M"    # strftime format
+    height: 30            # Height in pixels for clock area
+    font: "-*-*-bold-*-*-*-24-*-*-*-*-*-*-*"  # X11 font specification
+    color: white         # Text color
+    bgcolor: black       # Background color
