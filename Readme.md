@@ -86,18 +86,6 @@ You can find a full example in `.\pillar.example`. You will any default values i
 - Password protected
 - Local-only by default (localhost) - use ssh tunneling to get a save/ encrypted connection
 
-### Power Management
-- Scheduled shutdown support
-- Configurable shutdown time
-- Optional enable/disable
-- rtcwake support - power down your kiosk for a given time period
-
-### Screen Power Management
-- Optional screen power saving
-- Configurable screen blank time
-- Configurable screen power off time
-- Automatic reactivation on mouse/keyboard activity
-
 ### Multi display support
 You can attach multiple displays on your kiosk device.  
 You can show the same url on all or define `displays` variable to show different pages on your screens.  
@@ -120,7 +108,19 @@ You can also set `chromePolicies` to a Google Chrome Policy JSON or YAML.
 You can look for an example [here](https://github.com/google/ChromeBrowserEnterprise/blob/main/docs/policy_examples/managed_policies.json).
 The documentation can be found [here](https://chromeenterprise.google/policies/).
 This allows you to also set bookmarks or install specific extensions.  
-  
+
+### Power Management
+- Scheduled shutdown support
+- Configurable shutdown time
+- Optional enable/disable
+- rtcwake support - power down your kiosk for a given time period
+
+### Screen Power Management
+- Optional screen power saving
+- Configurable screen blank time
+- Configurable screen power off time
+- Automatic reactivation on mouse/keyboard activity
+
 Configuration example:
 ```yaml
 kiosk:
