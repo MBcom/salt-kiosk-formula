@@ -16,6 +16,7 @@ A SaltStack formula to configure plain Debian PCs machines as kiosk devices with
 - Optional screen power saving
 - Optional turn off kiosk mode to create browser only work stations
 - Support for [Chrome polcies](https://support.google.com/chrome/a/answer/9027408?hl=en) to manage Google Chrome Browser settings like bookmarks etc.
+- Support to register chrome as managed browser
 - Optional display the current time on screen
   
 **Do you also looking for an web app to centrally manage your kiosk screens?** Have a look at [Kiosk Manager](https://github.com/MBcom/kioskmanager). It's also open source ;)  
@@ -108,6 +109,10 @@ You can also set `chromePolicies` to a Google Chrome Policy JSON or YAML.
 You can look for an example [here](https://github.com/google/ChromeBrowserEnterprise/blob/main/docs/policy_examples/managed_policies.json).
 The documentation can be found [here](https://chromeenterprise.google/policies/).
 This allows you to also set bookmarks or install specific extensions.  
+  
+You can also set `chromeEnrollmentToken` to register each browser in Chrome Enterprise Core.
+See [Enroll cloud-managed Chrome browsers](https://support.google.com/chrome/a/answer/9301891?hl=en#zippy=%2Cenroll-browsers-on-linux) for more details.  
+  
 
 ### Power Management
 - Scheduled shutdown support

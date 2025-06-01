@@ -92,6 +92,7 @@ kiosk:
       ]
     }
 
+  chromeEnrollmentToken: ""  # Optional: Enrollment token for Chrome Enterprise (if needed)
     
   # GUI Clock settings
   clock:

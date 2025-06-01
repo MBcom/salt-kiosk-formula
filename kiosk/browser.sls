@@ -18,7 +18,29 @@ kiosk_chrome_policies:
     - makedirs: True
     - contents: |
         {{ kiosk.chromePolicies | tojson }}
+{% else %}
+kiosk_chrome_policies:
+  file.absent:
+    - name: /etc/opt/chrome/policies/managed/kiosk.json
 {% endif %}
+
+{%- if kiosk.chromeEnrollmentToken %}
+# Create the Chrome enrollment token file
+kiosk_chrome_enrollment_token:
+  file.managed:
+    - name: /etc/opt/chrome/policies/enrollment/CloudManagementEnrollmentToken
+    - user: root
+    - group: root
+    - mode: 644
+    - template: jinja
+    - makedirs: True
+    - contents: |
+        {{ kiosk.chromeEnrollmentToken }}
+{% else %}
+kiosk_chrome_enrollment_token:
+  file.absent:
+    - name: /etc/opt/chrome/policies/enrollment/CloudManagementEnrollmentToken
+{%- endif %}
 
 # Create the .xinitrc file in the kiosk user's home directory
 kiosk_user_xinitrc:

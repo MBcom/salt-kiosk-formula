@@ -94,6 +94,8 @@ kiosk:
     #     }
     #   ]
     # }
+
+  chromeEnrollmentToken: ""  # Optional: Enrollment token for Chrome Enterprise (if needed)
     
 
   # GUI Clock settings
@@ -101,6 +103,6 @@ kiosk:
     enabled: False
     format: "%H:%M"    # strftime format
     height: 30            # Height in pixels for clock area
-    font: "-*-*-bold-*-*-*-24-*-*-*-*-*-*-*"  # X11 font specification
+    font: "Roboto-12:bold"  # Xft font specification for Roboto, size 24, bold
     color: white         # Text color
     bgcolor: black       # Background color

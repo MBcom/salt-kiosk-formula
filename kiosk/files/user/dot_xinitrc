@@ -23,7 +23,7 @@ start_clock() {
     local offset_y=$4
     
     # Calculate position (centered at bottom)
-    local clock_width=200  # Fixed width for clock
+    local clock_width=34  # Fixed width for clock
     local clock_x=$((offset_x + (display_width - clock_width) / 2))  # Center horizontally
     local clock_y=$((display_height - {{ clock.height }}))
     

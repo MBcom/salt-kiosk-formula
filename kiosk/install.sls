@@ -14,6 +14,7 @@ kiosk_base_packages:
       - fonts-dejavu-core
       - wget
       - xdotool
+      - fonts-roboto
 
 # --- Browser Installation ---
 
