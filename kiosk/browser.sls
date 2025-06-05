@@ -60,7 +60,7 @@ kiosk_user_xinitrc:
         poweroff_time: {{ kiosk.screen_power_management.poweroff_time }}
         displays: {{ kiosk.displays }}
         clock:
-          enabled: "{{ kiosk.clock.enabled }}"
+          enabled: {{ kiosk.clock.enabled }}
           format: "{{ kiosk.clock.format }}"
           height: "{{ kiosk.clock.height }}"
           font: "{{ kiosk.clock.font }}"

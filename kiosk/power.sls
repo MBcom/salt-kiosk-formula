@@ -6,7 +6,7 @@
 {%- for key,value in kiosk.power.items() %}
 {%-   if value.enabled %}
 # Add cron job for scheduled shutdown
-scheduled_shutdown:
+scheduled_shutdown_{{ key }}:
   cron.present:
     - name: /sbin/poweroff # Use poweroff or shutdown -h now
     - user: root
@@ -20,7 +20,7 @@ scheduled_shutdown:
       - pkg: kiosk_base_packages # Ensure cron is installed
 {%-   else %}
 # Remove shutdown cron job if disabled
-scheduled_shutdown:
+scheduled_shutdown_{{ key }}:
   cron.absent:
     - identifier: KIOSK_AUTO_SHUTDOWN_{{ key }}
     - user: root
@@ -30,7 +30,7 @@ scheduled_shutdown:
 {%- for key,value in kiosk.rtcwake.items() %}
 {%-   if value.enabled %}
 # Schedule wake from hibernate
-scheduled_wake:
+scheduled_wake_{{ key }}:
   cron.present:
     - name: /usr/sbin/rtcwake -m {{ value.mode }} -s {{ value.duration }}
     - user: root
@@ -44,7 +44,7 @@ scheduled_wake:
       - pkg: kiosk_base_packages
 {%-   else %}
 # Remove rtcwake cron job if disabled
-scheduled_wake:
+scheduled_wake_{{ key }}:
   cron.absent:
     - identifier: KIOSK_HIBERNATE_WAKE_{{ key }}
     - user: root
