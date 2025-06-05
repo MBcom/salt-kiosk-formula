@@ -16,12 +16,12 @@ xset s off -dpms
 {% endif %}
 
 {%- if disable_unused_ttys %}
-setxkbmap -option srvrkeys:none  # Disable Ctrl+Alt+Fn switching
+# Disable Ctrl+Alt+Fn switching
+setxkbmap -option srvrkeys:none
 {%- endif %}
 
 {%- for key in disable_keys %}
-# Disable specific key combinations 
-xmodmap -e "{{ key }}"  # Disable key
+xmodmap -e "{{ key }}"
 {%- endfor %}
 
 # Function to start clock
