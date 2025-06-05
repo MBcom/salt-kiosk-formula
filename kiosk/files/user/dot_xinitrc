@@ -15,6 +15,15 @@ xset dpms {{ blank_time * 60 }} {{ blank_time * 60 }} {{ poweroff_time * 60 }}
 xset s off -dpms
 {% endif %}
 
+{%- if disable_unused_ttys %}
+setxkbmap -option srvrkeys:none  # Disable Ctrl+Alt+Fn switching
+{%- endif %}
+
+{%- for key in disable_keys %}
+# Disable specific key combinations 
+xmodmap -e "{{ key }}"  # Disable key
+{%- endfor %}
+
 # Function to start clock
 start_clock() {
     local display_width=$1
@@ -178,13 +187,13 @@ for i in "${!DISPLAYS[@]}"; do
     width=$(echo "$resolution" | cut -d'x' -f1)
     height=$(echo "$resolution" | cut -d'x' -f2)
     
-    # Use URL from list if available, otherwise use default
-    url="${URL_LIST[$i]:-$START_URL}"
-    start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
-
     {% if clock.enabled %}
     start_clock "$width" "$height" "$offset_x" "$offset_y"
     {% endif %}
+
+    # Use URL from list if available, otherwise use default
+    url="${URL_LIST[$i]:-$START_URL}"
+    start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
 done
 
 # Monitor and restart browsers if they crash

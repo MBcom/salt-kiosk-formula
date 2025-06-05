@@ -102,3 +102,25 @@ kiosk:
     font: "-*-*-bold-*-*-*-24-*-*-*-*-*-*-*"  # X11 font specification
     color: white         # Text color
     bgcolor: black       # Background color
+
+  # Disable keys
+  disable_keys:
+    - clear mod1
+    - clear mod2
+    - clear mod3
+    - clear mod4
+    - clear mod5
+    - keycode 67 = # F1
+    - keycode 68 = # F2
+    - keycode 69 = # F3
+    - keycode 70 = # F4
+    #- keycode 71 = # F5
+    - keycode 72 = # F6
+    - keycode 73 = # F7
+    - keycode 74 = # F8
+    - keycode 75 = # F9
+    - keycode 76 = # F10
+    - keycode 95 = # F11
+
+  certificates:
+    import_system_cas: True

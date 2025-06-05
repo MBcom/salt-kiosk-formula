@@ -66,8 +66,46 @@ kiosk_user_xinitrc:
           font: "{{ kiosk.clock.font }}"
           color: "{{ kiosk.clock.color }}"
           bgcolor: "{{ kiosk.clock.bgcolor }}"
+        disable_unused_ttys: {{ kiosk.disable_unused_ttys }}
+        disable_keys: {{ kiosk.disable_keys }}
         
     - require:
       - user: kiosk_user_account
       - pkg: kiosk_base_packages # Ensure xinit is installed
       - pkg: google_chrome_installed
+
+{%- if kiosk.certificates.import_system_cas %}
+{% set nssdb = home + '/.pki/nssdb' %}
+
+# Ensure Chrome's certificate directory exists
+ensure_chrome_cert_dir:
+  file.directory:
+    - name: {{ nssdb }}
+    - user: {{ user }}
+    - group: {{ user }}
+    - mode: 700
+    - makedirs: True
+    - require:
+      - user: kiosk_user_account
+
+# Initialize NSS database if it doesn't exist
+init_nss_db:
+  cmd.run:
+    - name: certutil -d sql:{{ nssdb }} -N --empty-password
+    - runas: {{ user }}
+    - unless: test -f {{ nssdb }}/cert9.db
+    - require:
+      - file: ensure_chrome_cert_dir
+      - pkg: kiosk_base_packages
+
+{%-   for cert in salt['cmd.run']('find /usr/share/ca-certificates/ -type f -name "*.crt"').split() %}
+{%-     set cert_name = cert | regex_replace('\.crt$/', '') %}
+import_system_ca_{{ cert | replace('/', '_') }}:
+  cmd.run:
+    - name: certutil -d sql:{{ nssdb }} -A -t "C,," -n "{{ cert_name }}" -i "{{ cert }}"
+    - runas: {{ user }}
+    - unless: certutil -d sql:{{ nssdb }} -L -n "{{ cert_name }}"
+    - require:
+      - cmd: init_nss_db
+{%-   endfor %}
+{%- endif %}

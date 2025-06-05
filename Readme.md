@@ -13,11 +13,13 @@ A SaltStack formula to configure plain Debian PCs machines as kiosk devices with
 - no need to install a GUI in debian
 - small ressource foot print - does not use any display manager
 - supports multiple displays
+- support to import system CA certificates into Chrome's certificate store to trust enterprise CA scenarios
 - Optional screen power saving
 - Optional turn off kiosk mode to create browser only work stations
 - Support for [Chrome polcies](https://support.google.com/chrome/a/answer/9027408?hl=en) to manage Google Chrome Browser settings like bookmarks etc.
 - Support to register chrome as managed browser
 - Optional display the current time on screen
+- Disable or remap keys using xmodmap
   
 **Do you also looking for an web app to centrally manage your kiosk screens?** Have a look at [Kiosk Manager](https://github.com/MBcom/kioskmanager). It's also open source ;)  
   
@@ -113,7 +115,16 @@ This allows you to also set bookmarks or install specific extensions.
 You can also set `chromeEnrollmentToken` to register each browser in Chrome Enterprise Core.
 See [Enroll cloud-managed Chrome browsers](https://support.google.com/chrome/a/answer/9301891?hl=en#zippy=%2Cenroll-browsers-on-linux) for more details.  
   
+You can remap or disable specific keys using `xmodmap` syntax.
+Function keys F1-F4,F6-F11 are disabled by default.  
+You can overwrite this by setting `disable_keys` like this:  
+```yaml
+  disable_keys:
+    - keycode 71 = # Disable just F5
+```
 
+Use `xmodmap -pke` to get a list of all key mappings.  
+  
 ### Power Management
 - Scheduled shutdown support
 - Configurable shutdown time
@@ -150,6 +161,16 @@ Configuration example:
     enabled: True
 ```  
 See [pillar.example](pillar.example) file to see how to style this clock.  
+
+### Import System CA Certificates
+All certificates from `/usr/share/ca-certificates/` are automatically imported by default into Chrome's CA certificate store.
+This allows you to trust your enterprise root CA.  
+
+You can disable importing system CA certificates to Chrome's certificate store by setting:
+```yaml
+certificates:
+  import_system_cas: False
+```
 
 ## Usage
 
@@ -207,3 +228,7 @@ The formula can be customized through pillar data and map.jinja for:
 - File paths
 - Browser arguments
 - Power schedules
+
+## Copyright Notice
+
+Google Chrome™ is a trademark of Google LLC. This project is not affiliated with, endorsed by, or sponsored by Google LLC. All trademarks and registered trademarks are the property of their respective owners.

@@ -15,6 +15,7 @@ kiosk_base_packages:
       - wget
       - xdotool
       - fonts-roboto
+      - libnss3-tools
 
 # --- Browser Installation ---
 
