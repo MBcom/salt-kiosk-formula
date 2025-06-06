@@ -6,6 +6,19 @@
 WINDOW_FILE="/tmp/kiosk_windows.dat"
 > "$WINDOW_FILE"  # Clear window file on startup
 
+# Logging function
+log_message() {
+    local message=$1
+    local log_file=${2:-/tmp/kiosk_startup.log}  # Default to startup log if not specified
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] $message" >> "$log_file"
+    
+    # Also echo to console if it's an error and using error log
+    if [ "$log_file" = "/tmp/kiosk_error.log" ]; then
+        echo "[$timestamp] $message" >&2
+    fi
+}
+
 # Screen power management settings
 {% if screenPowerManagement %}
 xset +dpms
@@ -30,6 +43,7 @@ start_clock() {
     local display_height=$2
     local offset_x=$3
     local offset_y=$4
+    local display_name=$5
     
     # Calculate position (centered at bottom)
     local clock_width=34  # Fixed width for clock
@@ -44,6 +58,8 @@ start_clock() {
         -fg "{{ clock.color }}" -bg "{{ clock.bgcolor }}" \
         -geometry "${display_width}x{{ clock.height }}+${clock_x}+${clock_y}" \
         -face "{{ clock.font }}" &
+
+    echo "$display_name:clock" >> "$WINDOW_FILE"
 }
 
 # Function to get the last Chrome window ID
@@ -65,6 +81,9 @@ get_displays() {
             offset_x=$(echo "$geometry" | cut -d'+' -f2)
             offset_y=$(echo "$geometry" | cut -d'+' -f3)
             echo "$display_name $resolution $offset_x $offset_y"
+        else
+            log_message "Detected display $display_name without resolution. Running xrandr --auto to detect it."
+            /usr/bin/xrandr --auto
         fi
     done
 }
@@ -84,7 +103,7 @@ start_browser() {
     {% endif %}
     
     if [ -n "$width" ]; then
-        echo "Starting browser on $display ($width x $height) at position ($offset_x,$offset_y) with URL: $url" >> /tmp/kiosk_startup.log
+        log_message "Starting browser on $display ($width x $height) at position ($offset_x,$offset_y) with URL: $url"
         
         DISPLAY=:0 $BROWSER_CMD \
             --window-position=$offset_x,$offset_y \
@@ -107,7 +126,7 @@ start_browser() {
         # Store window info
         echo "${display}:${window_id}" >> "$WINDOW_FILE"
     else
-        echo "Failed to start browser on $display: Resolution not found." >> /tmp/kiosk_startup.log
+        log_message "Failed to start browser on $display: Resolution not found." /tmp/kiosk_error.log
     fi
 }
 
@@ -142,7 +161,7 @@ check_window() {
        [ "$current_y" != "$expected_y" ] || \
        [ "$current_width" != "$expected_width" ] || \
        [ "$current_height" != "$expected_height" ]; then
-        echo "Window $wid position changed, repositioning..." >> /tmp/kiosk_startup.log
+        log_message "Window $wid position changed, repositioning..."
         xdotool windowmove $wid $expected_x $expected_y
         xdotool windowsize $wid $expected_width $expected_height
     fi
@@ -161,8 +180,14 @@ check_internet() {
 }
 
 while ! check_internet; do
-    echo "Waiting 5s for internet connection..." >> /tmp/kiosk_startup.log
-    echo "Waiting 5s for internet connection..."
+    log_message "Waiting 5s for internet connection..."
+    # Get IP address (works even without network)
+    IP=$(ip addr show | grep -w inet | grep -v '127.0.0.1' | awk '{print $2}' | cut -d'/' -f1)
+    /bin/xmessage -center \
+        -bg "#1e1e1e" -fg "#d4d4d4" \
+        -timeout 5 \
+        -fn '-adobe-courier-bold-r-normal--34-240-100-100-m-200-iso10646-1' \
+        "No connection to internet. Retrying in 5 seconds. My IP is: $IP"
     sleep 5
 done
 
@@ -188,7 +213,7 @@ for i in "${!DISPLAYS[@]}"; do
     height=$(echo "$resolution" | cut -d'x' -f2)
     
     {% if clock.enabled %}
-    start_clock "$width" "$height" "$offset_x" "$offset_y"
+    start_clock "$width" "$height" "$offset_x" "$offset_y" "$display_name"
     {% endif %}
 
     # Use URL from list if available, otherwise use default
@@ -228,7 +253,13 @@ while true; do
         done < "$WINDOW_FILE"
         
         if [ "$browser_running" = false ]; then
-            echo "Browser on display $display_name exited. Restarting..." >> /tmp/kiosk_startup.log
+            {% if clock.enabled %}
+            if ! grep -q "$display_name:clock" "$WINDOW_FILE"; then
+                log_message "Clock not running on display $display_name. Starting clock..."
+                start_clock "$width" "$height" "$offset_x" "$offset_y" "$display_name"
+            fi
+            {% endif %}
+            log_message "Browser on display $display_name exited. Restarting..."
             start_browser "$display_name" "$url" "$width" "$height" "$offset_x" "$offset_y"
         fi
     done

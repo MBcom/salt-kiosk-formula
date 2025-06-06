@@ -29,10 +29,23 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# Logging function
+log_message() {
+    local message=$1
+    local log_file=${2:-/tmp/kiosk_startup.log}  # Default to startup log if not specified
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] $message" >> "$log_file"
+    
+    # Also echo to console if it's an error and using error log
+    if [ "$log_file" = "/tmp/kiosk_error.log" ]; then
+        echo "[$timestamp] $message" >&2
+    fi
+}
+
 # --- KIOSK STARTUP ---
 # Automatically start the X server if on tty1 and no X server is running
 if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-  echo "Attempting to start X session..." > /tmp/kiosk_startup.log
+  log_message "Attempting to start X session..."
   # Try to start X. If it fails, prevent a login loop.
   startx 2> /tmp/x_error.log || echo "Failed to start X session. Check logs." && sleep 5
   # Optional: logout after startx finishes (though .xinitrc loops)
